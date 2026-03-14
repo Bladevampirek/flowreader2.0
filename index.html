@@ -24,6 +24,7 @@
       const [inputText, setInputText] = useState("");
       const [textColor, setTextColor] = useState("#ffffff");
       const [highlightColor, setHighlightColor] = useState("#facc15");
+      const [chunkGroupColor, setChunkGroupColor] = useState("#14324a");
       const [readerColor, setReaderColor] = useState("#22d3ee");
       const [bgColor, setBgColor] = useState("#18181b");
       const [panelColor, setPanelColor] = useState("#111827");
@@ -32,7 +33,7 @@
       const [scoreColor, setScoreColor] = useState("#000000");
 
       const [isRunning, setIsRunning] = useState(false);
-      const [highlightEnabled, setHighlightEnabled] = useState(true);
+      const [highlightMode, setHighlightMode] = useState("on");
       const [chunks, setChunks] = useState([]);
       const [currentChunkIndex, setCurrentChunkIndex] = useState(0);
       const [startedAt, setStartedAt] = useState(null);
@@ -48,6 +49,7 @@
 
       const textPicker = useRef(null);
       const highlightPicker = useRef(null);
+      const chunkGroupPicker = useRef(null);
       const readerPicker = useRef(null);
       const bgPicker = useRef(null);
       const panelPicker = useRef(null);
@@ -578,7 +580,7 @@
         if (activeRightAfterOffset > laneWidth - rightPadding) offset -= activeRightAfterOffset - (laneWidth - rightPadding);
 
         setLaneOffset(offset);
-      }, [currentChunkIndex, chunks, highlightEnabled]);
+      }, [currentChunkIndex, chunks, highlightMode]);
 
       useEffect(() => {
         const tests = () => {
@@ -618,6 +620,7 @@
       const topSwatches = [
         [textColor, textPicker, setTextColor, "Text Color"],
         [highlightColor, highlightPicker, setHighlightColor, "Highlight Color"],
+        [chunkGroupColor, chunkGroupPicker, setChunkGroupColor, "Chunk Group Color"],
         [readerColor, readerPicker, setReaderColor, "Reader Color"],
         [panelColor, panelPicker, setPanelColor, "Panel Color"],
         [bgColor, bgPicker, setBgColor, "Background Color"],
@@ -625,6 +628,20 @@
         [statBoxColor, statBoxPicker, setStatBoxColor, "Stat Box Color"],
         [scoreColor, scorePicker, setScoreColor, "Score Color"],
       ];
+
+      const cycleHighlightMode = useCallback(() => {
+        setHighlightMode((prev) => {
+          if (prev === "on") return "off";
+          if (prev === "off") return "custom";
+          return "on";
+        });
+      }, []);
+
+      const highlightButtonLabel = highlightMode === "on"
+        ? "Highlight On"
+        : highlightMode === "off"
+          ? "Highlight Off"
+          : "HighL:Custom";
 
       return (
         <div className="min-h-screen bg-black flex items-center justify-center p-4 text-white font-sans">
@@ -737,13 +754,18 @@
                                 className="inline-flex items-center mr-8"
                                 style={{
                                   opacity: isActiveChunk ? 1 : 0.72,
-                                  backgroundColor: isActiveChunk ? `${readerColor}20` : "transparent",
+                                  backgroundColor: isActiveChunk ? chunkGroupColor : "transparent",
                                   borderRadius: isActiveChunk ? "12px" : "0px",
                                   padding: isActiveChunk ? "4px 12px" : "0",
                                 }}
                               >
                                 {chunk.analyzed.map((part) => {
-                                  const shouldHighlight = highlightEnabled && ["subject", "verb", "place", "color", "number", "reference", "creature", "knowledge", "forced"].includes(part.type);
+                                  const semanticTypes = ["subject", "verb", "place", "color", "number", "reference", "creature", "knowledge"];
+                                  const shouldHighlight = highlightMode === "on"
+                                    ? [...semanticTypes, "forced"].includes(part.type)
+                                    : highlightMode === "custom"
+                                      ? part.type === "forced"
+                                      : false;
                                   return <span key={`${realChunkIndex}-${part.key}`} style={{ color: shouldHighlight ? highlightColor : textColor }}>{part.text}</span>;
                                 })}
                               </span>
@@ -758,7 +780,7 @@
 
                   <div className="pt-4 text-[15px] flex items-end justify-between gap-5" style={{ color: "#7e8aa4" }}>
                     <div className="max-w-[78%] leading-[1.6]">
-                      {hasFinished ? `Finished. Final flow ${finalFlow}% and final WPM ${finalWpm}.` : autoWpm ? `Auto-reading at ${autoWpm} WPM until the text is finished.` : "Press Space for next chunk. The gravity anchor holds your eye point while the text lane glides beneath it."}
+                      {hasFinished ? `Finished. Final flow ${finalFlow}% and final WPM ${finalWpm}.` : autoWpm ? `Auto-reading at ${autoWpm} WPM until the text is finished.` : "Press Space for next chunk. The gravity anchor holds your eye point while the text lane glides above it."}
                     </div>
                     <div className="font-bold shrink-0 text-[15px]" style={{ color: "#1fdcff" }}>Reader {progressPercent}%</div>
                   </div>
@@ -771,8 +793,8 @@
                   <div className="grid grid-cols-2 gap-3 text-[18px]">
                     <button onClick={startReading} className="rounded-[18px] font-bold py-3" style={{ background: "#33c3e1", color: "#000" }}>Start</button>
                     <button onClick={stopReading} className="rounded-[18px] border py-3" style={{ borderColor: "#34435c", background: "#020a25", color: "#ffffff" }}>Stop</button>
-                    <button onClick={() => setHighlightEnabled((prev) => !prev)} className="rounded-[18px] border py-3 col-span-1" style={{ borderColor: "#34435c", background: "#020a25", color: highlightEnabled ? highlightColor : textColor }}>
-                      Highlight {highlightEnabled ? "On" : "Off"}
+                    <button onClick={cycleHighlightMode} className="rounded-[18px] border py-3 col-span-1" style={{ borderColor: "#34435c", background: "#020a25", color: highlightMode === "off" ? textColor : highlightColor }}>
+                      {highlightButtonLabel}
                     </button>
                     <button onClick={copyContactLink} className="rounded-[18px] border py-3" style={{ borderColor: "#34435c", background: "#020a25", color: "#ffffff" }}>
                       Contact
