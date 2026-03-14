@@ -18,7 +18,7 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useCallback, useEffect, useMemo, useRef, useState } = React;
+    const { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } = React;
 
     function ReadSpeedGuiMockup() {
       const [inputText, setInputText] = useState("");
@@ -46,6 +46,8 @@
       const [hasFinished, setHasFinished] = useState(false);
       const [autoWpm, setAutoWpm] = useState(null);
       const [copyNotice, setCopyNotice] = useState(false);
+      const [showAnchorDot, setShowAnchorDot] = useState(true);
+      const [anchorDotColor, setAnchorDotColor] = useState("#22d3ee");
 
       const textPicker = useRef(null);
       const highlightPicker = useRef(null);
@@ -56,11 +58,13 @@
       const labelPicker = useRef(null);
       const statBoxPicker = useRef(null);
       const scorePicker = useRef(null);
+      const anchorDotPicker = useRef(null);
       const activeChunkRef = useRef(null);
       const activeLaneRef = useRef(null);
       const autoAdvanceTimeoutRef = useRef(null);
       const autoModeRef = useRef(false);
       const copyNoticeTimeoutRef = useRef(null);
+      const appShellRef = useRef(null);
 
       const verbSet = useMemo(() => new Set([
         "is", "are", "was", "were", "be", "being", "been", "am", "do", "does", "did", "done",
@@ -122,6 +126,29 @@
         return () => {
           if (copyNoticeTimeoutRef.current) clearTimeout(copyNoticeTimeoutRef.current);
         };
+      }, []);
+
+      const [isFullscreen, setIsFullscreen] = useState(false);
+
+      const toggleFullscreen = useCallback(async () => {
+        try {
+          if (!document.fullscreenElement) {
+            await (appShellRef.current || document.documentElement).requestFullscreen();
+          } else {
+            await document.exitFullscreen();
+          }
+        } catch (err) {
+          // Ignore fullscreen errors in unsupported environments.
+        }
+      }, []);
+
+      useEffect(() => {
+        const syncFullscreenState = () => {
+          setIsFullscreen(Boolean(document.fullscreenElement));
+        };
+
+        document.addEventListener("fullscreenchange", syncFullscreenState);
+        return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
       }, []);
 
       const normalizeWord = (word) => (word || "").toLowerCase().replace(/^[^a-zA-Z]+|[^a-zA-Z]+$/g, "");
@@ -513,6 +540,12 @@
             target.isContentEditable
           );
 
+          if (e.code === "F11") {
+            e.preventDefault();
+            toggleFullscreen();
+            return;
+          }
+
           if (e.code === "Space" && !isTypingField) {
             if (autoModeRef.current) return;
             e.preventDefault();
@@ -522,7 +555,7 @@
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-      }, [advanceChunk]);
+      }, [advanceChunk, toggleFullscreen]);
 
       useEffect(() => {
         if (!isRunning || !autoWpm || !chunks.length) return;
@@ -560,7 +593,7 @@
         };
       }, [isRunning, autoWpm, chunks, currentChunkIndex, startedAt, triggerAutoAdvance]);
 
-      useEffect(() => {
+      useLayoutEffect(() => {
         const laneEl = activeLaneRef.current;
         const chunkEl = activeChunkRef.current;
         if (!laneEl || !chunkEl || !chunks.length) return;
@@ -646,20 +679,35 @@
       return (
         <div className="min-h-screen bg-black flex items-center justify-center p-4 text-white font-sans">
           <div
+            ref={appShellRef}
             className="w-[1120px] h-[720px] border rounded-[30px] overflow-hidden shadow-2xl grid"
             style={{
               backgroundColor: bgColor,
               borderColor: "#2d3748",
               gridTemplateRows: "58px 128px 1fr 126px",
               boxShadow: "0 24px 70px rgba(0,0,0,.45)",
+              width: isFullscreen ? "100vw" : "1120px",
+              height: isFullscreen ? "100vh" : "720px",
+              borderRadius: isFullscreen ? "0px" : "30px",
             }}
           >
-            <div className="px-6 border-b flex items-center justify-between" style={{ borderColor: "#273142", background: "linear-gradient(to right, rgba(12,12,18,.98), rgba(20,20,26,.98))" }}>
-              <div className="flex items-center gap-6">
+            <div className="px-6 border-b flex items-center gap-6" style={{ borderColor: "#273142", background: "linear-gradient(to right, rgba(12,12,18,.98), rgba(20,20,26,.98))" }}>
+              <div className="flex items-center gap-6 shrink-0">
                 <div className="text-[16px] tracking-[0.40em] uppercase" style={{ color: "#17d6ff" }}>Read Speed System</div>
                 <div className="text-[15px]" style={{ color: "#bfc6d4" }}>720 x 480 Compact Layout</div>
               </div>
-              <div className="text-[23px] font-bold" style={{ color: "#ffffff" }}>Flow Reader</div>
+              <div className="flex-1 flex items-center justify-center min-w-0">
+                <a
+                  href="https://store.steampowered.com/app/4455850/Speed_Grinder_20/"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="h-[34px] px-5 rounded-full border inline-flex items-center justify-center text-[12px] font-bold tracking-[0.18em] uppercase whitespace-nowrap"
+                  style={{ color: scoreColor, textDecoration: "none", borderColor: readerColor, background: readerColor, boxShadow: "inset 0 0 0 1px rgba(255,255,255,.06)" }}
+                >
+                  More Flow Training Tools
+                </a>
+              </div>
+              <div className="text-[23px] font-bold shrink-0" style={{ color: "#ffffff" }}>Flow Reader</div>
             </div>
 
             <div className="px-4 py-3 border-b" style={{ borderColor: "#273142", background: "rgba(20,20,26,.92)" }}>
@@ -701,7 +749,10 @@
                   >
                     Paste
                   </button>
-                  <button onClick={startReading} className="px-8 h-[46px] rounded-[18px] text-[17px] font-bold" style={{ background: "#33c3e1", color: "#000000" }}>Start</button>
+                  <button onClick={startReading} className="px-8 h-[46px] rounded-[18px] text-[17px] font-bold" style={{ background: readerColor, color: scoreColor }}>Start</button>
+                  <button onClick={toggleFullscreen} className="px-5 h-[46px] rounded-[18px] border text-[16px] font-bold" style={{ borderColor: "#34435c", background: "#030a25", color: isFullscreen ? readerColor : "#ffffff" }}>
+                    {isFullscreen ? "Windowed" : "Fullscreen"}
+                  </button>
                   <button onClick={clearAll} className="px-6 h-[46px] rounded-[18px] border text-[17px]" style={{ borderColor: "#34435c", background: "#030a25", color: "#ffffff" }}>Clear</button>
                 </div>
               </div>
@@ -737,13 +788,15 @@
                   </div>
 
                   <div onClick={() => { if (!autoModeRef.current) advanceChunk(); }} className="flex-1 min-h-0 mt-1 rounded-[32px] border px-6 flex items-center overflow-hidden relative cursor-pointer" style={{ borderColor: "#39435a", background: "#020b20" }}>
-                    <div className="absolute top-1/2 -translate-y-1/2 pointer-events-none z-0" style={{ left: "36%", top: "calc(50% + 55px)", transform: "translate(-50%, -50%)" }}>
-                      <div className="rounded-full" style={{ width: "16px", height: "16px", backgroundColor: readerColor, opacity: 0.45 }} />
-                    </div>
+                    {showAnchorDot && (
+                      <div className="absolute top-1/2 -translate-y-1/2 pointer-events-none z-0" style={{ left: "36%", top: "calc(50% + 55px)", transform: "translate(-50%, -50%)" }}>
+                        <div className="rounded-full" style={{ width: "16px", height: "16px", backgroundColor: anchorDotColor, opacity: 0.6 }} />
+                      </div>
+                    )}
 
                     <div ref={activeLaneRef} className="relative z-10 w-full h-full overflow-hidden flex items-center">
                       {visibleContext.length ? (
-                        <div className="absolute left-0 top-1/2 text-[22px] font-bold leading-[1.25] transition-transform duration-300 ease-out will-change-transform" style={{ transform: `translate(${laneOffset}px, -50%)`, whiteSpace: "pre" }}>
+                        <div className="absolute left-0 top-1/2 text-[22px] font-bold leading-[1.25] will-change-transform" style={{ transform: `translate(${laneOffset}px, -50%)`, whiteSpace: "pre" }}>
                           {visibleContext.map((chunk, chunkOffset) => {
                             const realChunkIndex = contextStart + chunkOffset;
                             const isActiveChunk = realChunkIndex === currentChunkIndex;
@@ -780,7 +833,7 @@
 
                   <div className="pt-4 text-[15px] flex items-end justify-between gap-5" style={{ color: "#7e8aa4" }}>
                     <div className="max-w-[78%] leading-[1.6]">
-                      {hasFinished ? `Finished. Final flow ${finalFlow}% and final WPM ${finalWpm}.` : autoWpm ? `Auto-reading at ${autoWpm} WPM until the text is finished.` : "Press Space for next chunk. The gravity anchor holds your eye point while the text lane glides above it."}
+                      {hasFinished ? `Finished. Final flow ${finalFlow}% and final WPM ${finalWpm}.` : autoWpm ? `Auto-reading at ${autoWpm} WPM until the text is finished.` : "Press Space for next chunk. The gravity anchor holds your eye point while the text lane glides above it. Press F11 to toggle Fullscreen."}
                     </div>
                     <div className="font-bold shrink-0 text-[15px]" style={{ color: "#1fdcff" }}>Reader {progressPercent}%</div>
                   </div>
@@ -791,7 +844,7 @@
                 <div className="rounded-[34px] border shadow-lg p-5" style={{ backgroundColor: panelColor, borderColor: "#23324b" }}>
                   <div className="text-[14px] uppercase tracking-[0.40em] mb-4" style={{ color: labelColor }}>Controls</div>
                   <div className="grid grid-cols-2 gap-3 text-[18px]">
-                    <button onClick={startReading} className="rounded-[18px] font-bold py-3" style={{ background: "#33c3e1", color: "#000" }}>Start</button>
+                    <button onClick={startReading} className="rounded-[18px] font-bold py-3" style={{ background: readerColor, color: scoreColor }}>Start</button>
                     <button onClick={stopReading} className="rounded-[18px] border py-3" style={{ borderColor: "#34435c", background: "#020a25", color: "#ffffff" }}>Stop</button>
                     <button onClick={cycleHighlightMode} className="rounded-[18px] border py-3 col-span-1" style={{ borderColor: "#34435c", background: "#020a25", color: highlightMode === "off" ? textColor : highlightColor }}>
                       {highlightButtonLabel}
@@ -799,6 +852,30 @@
                     <button onClick={copyContactLink} className="rounded-[18px] border py-3" style={{ borderColor: "#34435c", background: "#020a25", color: "#ffffff" }}>
                       Contact
                     </button>
+                    <div className="col-span-2 rounded-[16px] border px-3 py-2 flex items-center justify-between gap-3" style={{ borderColor: "#34435c", background: "#020a25" }}>
+                      <div className="text-[12px] uppercase tracking-[0.24em]" style={{ color: labelColor }}>Eye Anchor</div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <button
+                          onClick={() => setShowAnchorDot((prev) => !prev)}
+                          className="w-[42px] h-[24px] rounded-full border relative transition-colors"
+                          style={{ borderColor: showAnchorDot ? "rgba(51,195,225,.55)" : "#34435c", background: showAnchorDot ? "rgba(51,195,225,.20)" : "#0b1227" }}
+                          aria-label="Toggle eye anchor dot"
+                          title="Toggle eye anchor dot"
+                        >
+                          <span
+                            className="absolute top-1/2 -translate-y-1/2 rounded-full transition-all"
+                            style={{ width: "16px", height: "16px", left: showAnchorDot ? "22px" : "4px", background: showAnchorDot ? "#33c3e1" : "#62708d" }}
+                          />
+                        </button>
+                        <div
+                          onClick={() => anchorDotPicker.current?.click()}
+                          className="w-[24px] h-[24px] rounded-[7px] border cursor-pointer shrink-0"
+                          style={{ backgroundColor: anchorDotColor, borderColor: "rgba(125,145,185,.42)" }}
+                          title="Eye anchor color"
+                        />
+                        <input type="color" ref={anchorDotPicker} value={anchorDotColor} onChange={(e) => setAnchorDotColor(e.target.value)} className="hidden" />
+                      </div>
+                    </div>
                   </div>
                   <div className="h-5 mt-2 text-[14px] font-bold" style={{ color: "#33c3e1" }}>
                     {copyNotice ? "copied to clipboard" : ""}
