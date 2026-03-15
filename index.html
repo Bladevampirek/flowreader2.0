@@ -49,6 +49,672 @@
       const [showAnchorDot, setShowAnchorDot] = useState(true);
       const [anchorDotColor, setAnchorDotColor] = useState("#22d3ee");
 
+      const [selectedStory, setSelectedStory] = useState("");
+
+      const storyPresets = useMemo(() => ([
+        { id: "story1", label: "Story 1 – Dracula Ch.2 (<1 min @400 WPM)", lesson: `Chapter II
+\`Jonathan Harker\` \`arrives\` at a \`castle\` in the \`Carpathian mountains\`.
+
+The \`driver\` shows \`prodigious strength\` and \`vanishes\` into the \`dark courtyard\`.
+
+\`Harker\` waits before the \`great door\`, filled with \`doubt\` and \`fear\`.
+
+The \`door opens\`.
+
+A \`tall old man\` appears holding a \`lamp\`.
+
+He says:
+
+“\`Welcome\` to my \`house\`. \`Enter freely\`.”
+
+The man \`grasps\` \`Harker’s hand\` with \`icy strength\`.
+
+He introduces himself:
+
+“I am \`Count Dracula\`.”
+
+\`Dracula\` \`welcomes\` \`Harker\` into the \`castle\`.
+
+He provides a \`bedroom\`, \`fire\`, and \`supper\`.
+
+While \`Harker eats\`, the \`Count questions\` him about his \`journey\`.
+
+\`Harker observes\` the \`Count’s face\`:
+
+\`sharp teeth\`
+\`extraordinary pallor\`
+\`long pointed nails\`
+
+A feeling of \`nausea\` comes over him.
+
+Outside, \`wolves howl\`.
+
+Dracula says:
+
+“\`Listen\` to the \`children of the night\`.”
+
+Morning approaches.
+
+The \`Count disappears\`.
+
+Later \`Harker wakes\`.
+
+He finds \`no servants\`.
+
+The \`castle\` contains \`wealth\`, \`ancient furnishings\`, but \`no mirrors\`.
+
+In the \`library\` the \`Count studies England\`.
+
+Dracula says he wishes to \`live in London\`.
+
+They discuss the \`estate at Purfleet\`.
+
+Dracula reveals he wants to \`walk London streets\` and \`blend among men\`.
+
+Harker begins to feel the \`castle\` is \`strange\`.
+
+That night while \`shaving\`, something \`terrifying happens\`.
+
+\`Dracula appears\` behind him.
+
+But in the \`mirror\` there is \`no reflection\`.
+
+Harker \`cuts himself\`.
+
+\`Dracula lunges\` toward the \`blood\`.
+
+The \`crucifix\` stops him.
+
+Dracula throws the \`mirror\` out the \`window\`.
+
+Later \`Harker explores\`.
+
+Every \`door\` is \`locked\`.
+
+The \`castle stands\` above a \`terrible precipice\`.
+
+At last he realizes the truth:
+
+The \`castle\` is a \`prison\`.
+
+\`Harker\` is a \`prisoner\`.` },
+        { id: "story2", label: "Story 2 – Frankenstein Ch.24 (~10 min @400 WPM)", lesson: `Chapter 24
+My present situation was one in which all voluntary thought was swallowed up and lost. I was hurried away by \`fury\`; \`revenge\` alone endowed me with \`strength\` and \`composure\`; it moulded my feelings and allowed me to be calculating and calm at periods when otherwise delirium or death would have been my portion.
+
+My first resolution was to \`quit Geneva for ever\`; my country, which, when I was happy and beloved, was dear to me, now, in my adversity, became hateful. I provided myself with a \`sum of money\`, together with a few \`jewels\` which had belonged to my mother, and \`departed\`.
+
+And now my \`wanderings\` began which are to cease but with \`life\`. I have traversed a vast portion of the earth and have endured all the \`hardships\` which travellers in deserts and barbarous countries are wont to meet. How I have lived I hardly know; many times have I stretched my failing limbs upon the sandy plain and \`prayed for death\`. But \`revenge kept me alive\`; I dared not die and leave my \`adversary\` in being.
+
+When I quitted Geneva my first labour was to gain some clue by which I might trace the steps of my \`fiendish enemy\`. But my plan was unsettled, and I wandered many hours round the confines of the town, uncertain what path I should pursue. As night approached I found myself at the entrance of the \`cemetery\` where \`William\`, \`Elizabeth\`, and my \`father\` reposed. I entered it and approached the tomb which marked their graves.
+
+The deep grief which this scene had at first excited quickly gave way to \`rage\` and \`despair\`. They were \`dead\`, and I \`lived\`; their \`murderer\` also lived, and to \`destroy him\` I must drag out my weary existence. I \`swear\` to \`pursue the dæmon\` until \`he or I shall perish\`. For this purpose I will preserve my life and execute this \`revenge\` against the \`monster\`.
+
+I was answered through the stillness of night by a loud and \`fiendish laugh\`. Then came a well-known and abhorred \`voice\`. I darted towards it, but the \`devil\` eluded my grasp. The moon shone upon his \`ghastly and distorted shape\`.
+
+I \`pursued him\` for many months, following the \`Rhone\`, the \`Mediterranean\`, and the \`Black Sea\`. Through \`Tartary\` and \`Russia\` I tracked his \`huge step\` across the snow. I endured \`cold\`, \`want\`, \`fatigue\`, and my \`eternal hell\`, yet \`revenge kept me alive\`.
+
+He left \`marks in writing\` that mocked me: his \`reign\` was not over, his \`power\` complete. He called me his \`enemy\` and promised we would \`wrestle for our lives\`.
+
+Again I \`vow vengeance\`, \`torture\`, and \`death\`. Never will I give up my \`search\` until \`he or I perish\`.
+
+As I journeyed northward, the \`snows\`, \`cold\`, and \`ice\` grew worse. Still I pressed on with \`courage\` and \`perseverance\` until I reached the \`ocean\`. I procured a \`sledge\` and \`dogs\`, and hoped to \`intercept\` the \`fiend\`.
+
+At a hamlet I learned a \`gigantic monster\` had passed with \`gun\`, \`pistols\`, \`food\`, \`sledge\`, and \`dogs\`. He had \`escaped\` me again, yet my \`rage\` and \`vengeance\` returned.
+
+I crossed the \`Frozen Ocean\`, enduring \`misery\`, \`destruction\`, \`despondency\`, and \`grief\`. At last I saw a \`sledge\` and the \`distorted proportions of a well-known form\`. My \`hope\` returned. I gained on my \`enemy\`.
+
+Then a \`ground sea\` split the ice. A tumultuous sea rolled between me and my \`enemy\`, and I was left on a piece of \`ice\` facing \`death\`.
+
+At last I saw your \`vessel\`. I made \`oars\`, moved my \`ice raft\`, and reached your \`ship\`. My \`task\` remains \`unfulfilled\`.
+
+If I \`die\` and he still \`live\`, seek him and satisfy my \`vengeance\` in his \`death\`. Trust him not; his \`soul\` is \`hellish\`, full of \`treachery\` and \`fiend-like malice\`. Call on \`William\`, \`Justine\`, \`Clerval\`, \`Elizabeth\`, my \`father\`, and \`Victor\`, and thrust your \`sword\` into his \`heart\`.
+
+Later \`Frankenstein\` tells Walton his \`story\`. He warns him never to \`create\` a \`demoniacal enemy\`. He speaks of his lost \`great enterprise\`, the \`creation\` of life, his \`eternal hell\`, and how he \`fell\`, never again to \`rise\`.
+
+He longs for \`Clerval\` and \`Elizabeth\`; they are \`dead\`. He must \`pursue\` and \`destroy\` the \`being\` to whom he gave \`existence\`, and then he may \`die\`.
+
+Trapped among \`mountains of ice\`, Walton fears the loss of his \`vessel\`, the \`lives\` of his men, and all \`hopes\`. \`Frankenstein\` stirs a near \`mutiny\` with a speech about a \`glorious expedition\`, \`dangers\`, \`terror\`, \`death\`, \`heroes\`, and the \`stigma of disgrace\`.
+
+At last the \`die is cast\`; Walton must \`return\`. \`Frankenstein\` still clings to \`vengeance\`, but soon his \`life\` fails.
+
+On his deathbed he says he will soon \`die\`, yet his \`enemy\` and \`persecutor\` may still live. He desired the \`death of my adversary\`; he \`created\` a rational creature, \`refused\` him a \`companion\`, and though the monster showed \`malignity\` and \`selfishness in evil\` and \`destroyed my friends\`, \`ought to die\`, Frankenstein has \`failed\`. He bids, \`Farewell, Walton\`, and his eyes \`closed for ever\`.
+
+Then a \`human voice\` is heard near the remains of \`Frankenstein\`. A figure, \`gigantic in stature\`, appears—the \`destroyer\`. He bends over the \`lifeless form of his creator\`.
+
+“That is also my \`victim\`!” he cries. His \`crimes\` are complete; he begs \`Frankenstein\` to \`pardon\` him. The \`monster\` utters \`self-reproaches\`.
+
+Walton speaks of \`repentance\`, but the \`dæmon\` answers with \`agony\` and \`remorse\`. He speaks of \`Clerval\`, \`love\`, \`sympathy\`, and \`torture\`. After \`Clerval\` died, \`envy\` and \`vengeance\` consumed him. \`Evil\` became his \`good\`. Frankenstein was his \`last victim\`.
+
+Yet the monster says once he loved \`virtue\`; now it is a \`shadow\`. He must \`suffer alone\`, then \`die\`. He once wished beings would \`love me\`, but now \`crime\` has made him a \`fallen angel\`, a \`malignant devil\`, utterly \`alone\`.
+
+He still desired \`love\` and \`fellowship\`, but was \`spurned\`; even \`Felix\` rejected him. He calls himself an \`abortion\`, a \`wretch\` who \`murdered\`, brought his \`creator\` to \`misery\` and \`irremediable ruin\`, and stands before his \`death\`.
+
+His \`work\` is nearly complete. He will make a \`sacrifice\`: \`quit your vessel\`, take the \`ice raft\`, build a \`funeral pile\`, \`consume to ashes\` his frame, and \`die\`. Polluted by \`crimes\` and \`remorse\`, he seeks rest only in \`death\`.
+
+With \`agony\`, \`remorse\`, \`funeral pile\`, \`ashes\`, and \`spirit\`, he cries \`Farewell\`, then \`sprang\` from the \`cabin-window\` onto the \`ice raft\` and was \`borne away\`, \`lost in darkness and distance\`.` },
+        { id: "story3", label: "Story 3 – Invisible Man (<1 min @400 WPM)", lesson: `\`THE STRANGE MAN'S ARRIVAL\`
+
+The \`stranger\` \`arrives\` on a \`wintry February day\`, walking from \`Bramblehurst railway station\`, carrying a \`black portmanteau\`.
+
+He is \`wrapped from head to foot\`, his \`face hidden\`, with only the \`tip of his nose visible\`.
+
+He \`stumbles\` into the \`Coach and Horses inn\`.
+
+“A \`fire\`,” he cries. “A \`room and a fire\`!”
+
+He \`takes a room\` after placing \`sovereigns on the table\`.
+
+\`Mrs. Hall\` prepares a \`meal\` for the \`new guest\`.
+
+The \`stranger\` stands \`staring out the window\`, \`lost in thought\`.
+
+He refuses to \`remove his coat or hat\`.
+
+When he turns, \`Mrs. Hall\` notices \`blue spectacles\` and \`side-whiskers\` hiding his \`face\`.
+
+He eats \`lunch\` alone.
+
+When Mrs. Hall returns, she sees a \`white object\` vanish behind the table.
+
+The \`stranger\` now sits with a \`serviette covering his mouth\`.
+
+His \`head\` is wrapped in \`white bandages\`.
+
+Only his \`pink nose\` is visible.
+
+His \`appearance\` is \`strange\` and \`unsettling\`.
+
+He watches her through \`inscrutable blue glasses\`.
+
+Mrs. Hall leaves the room \`confused\` and \`disturbed\`.
+
+The \`stranger\` checks the \`window\` and pulls the \`blind down\`, leaving the room in \`twilight\`.
+
+He resumes his \`meal\` quietly.
+
+Mrs. Hall speculates the man has had an \`accident\` or \`operation\`.
+
+She remarks on his \`bandages\`, \`goggles\`, and \`covered face\`.
+
+Later she returns to clear the table.
+
+The \`stranger\` sits in the \`corner\`, \`smoking a pipe\`, still hiding his \`mouth\`.
+
+He explains he has \`luggage\` at \`Bramblehurst station\`.
+
+He asks how it can be \`sent to the inn\`.
+
+Mrs. Hall tries to \`draw him into conversation\`.
+
+She speaks about \`accidents\` and \`injuries\`.
+
+But the \`stranger\` remains \`reserved\`.
+
+He laughs once, \`abruptly\`, then grows \`quiet again\`.
+
+When she asks too many questions, he cuts her off:
+
+“\`Get me some matches\`.”
+
+Mrs. Hall feels \`snubbed\`.
+
+The \`stranger\` turns away and \`stares out the window\`.
+
+He remains in the \`parlour\` until \`evening\`.
+
+Sitting in the \`firelight\`, \`silent\` and \`mysterious\`.
+
+Sometimes he \`paces the room\`.
+
+Sometimes he seems to be \`talking to himself\`.
+
+Then he sinks back into the \`armchair\`, alone in the \`darkening room\`.` },
+        { id: "story4", label: "Story 4 – The Bet (Lawyer's Story) (>1 min @400 WPM)", lesson: `\`THE BET\`
+
+On a \`dark autumn night\`, an \`old banker\` remembers a \`bet\` made \`fifteen years earlier\`.
+
+At a \`party\`, guests argued about \`capital punishment\` and \`life imprisonment\`.
+
+A \`young lawyer\` declared that \`to live anyhow is better than not at all\`.
+
+Excited, the \`banker\` shouted:
+
+“I'll bet you \`two million\` you wouldn't stay in \`solitary confinement\` for \`five years\`!”
+
+The \`lawyer\` replied:
+
+“I'll stay not \`five\` but \`fifteen years\`.”
+
+The \`bet\` was made.
+
+The \`lawyer\` would live in a \`lodge in the banker’s garden\`, in \`complete isolation\`, for \`fifteen years\`.
+
+He could have \`books\`, \`music\`, \`wine\`, and \`tobacco\`, but he could not \`see people\`, \`hear voices\`, or \`leave\`.
+
+If he stayed the full \`fifteen years\`, the \`banker\` must pay \`two million\`.
+
+During the \`first year\`, the \`prisoner\` suffered from \`loneliness\`.
+
+He read \`light novels\` and played the \`piano\`.
+
+In the \`second year\`, he read the \`classics\`.
+
+In the \`fifth year\`, he drank \`wine\`, listened to \`music\`, and often \`cried\`.
+
+Later he began studying \`languages\`, \`philosophy\`, and \`history\`.
+
+In \`four years\` he read over \`six hundred books\`.
+
+He wrote to the \`banker\` in \`six languages\` to prove his \`learning\`.
+
+In the \`tenth year\`, he read only the \`Gospel\`.
+
+Then he studied \`theology\` and \`religion\`.
+
+In the \`last years\`, he read \`everything\`—\`science\`, \`medicine\`, \`Shakespeare\`, \`Byron\`, and \`philosophy\`.
+
+Meanwhile the \`banker\` had lost much of his \`fortune\`.
+
+On the eve of the \`fifteenth year\`, he realized:
+
+“If I pay him \`two million\`, I shall be \`ruined\`.”
+
+In despair he thought:
+
+“The only way to save myself is the \`death of that man\`.”
+
+Late at night he went to the \`lodge\` with the \`key\`.
+
+He entered quietly and looked through the \`window\`.
+
+Inside sat the \`prisoner\`, thin as a \`skeleton\`, with \`long hair\` and a \`shaggy beard\`.
+
+Before him lay a \`sheet of paper\`.
+
+The \`banker\` read the \`letter\`.
+
+The \`prisoner\` wrote that through \`books\` he had experienced the \`world\`, \`wisdom\`, \`love\`, and \`knowledge\`.
+
+But now he \`despised\` the \`wealth\`, \`freedom\`, and \`pleasures\` of the world.
+
+“To prove my \`contempt\`,” he wrote,  
+“I \`renounce the two million\`.”
+
+He would leave the \`lodge\` \`five hours early\` and \`break the agreement\`.
+
+The \`banker\` was overcome with \`shame\`.
+
+He \`kissed\` the sleeping man on the \`head\` and left the \`lodge\`.
+
+In the morning the \`watchmen\` reported that the \`prisoner\` had \`escaped through the window\`.
+
+The \`lawyer\` had gone, abandoning the \`money\`.
+
+The \`banker\` locked the \`letter\` in his \`safe\`.` },
+        { id: "story5", label: "Story 5 – The Tell-Tale Heart (<1 min @400 WPM)", lesson: `\`THE TELL-TALE HEART\`
+
+The \`narrator\` insists he is \`not mad\`.
+
+He says he loved the \`old man\`, but hated the \`old man's eye\`.
+
+It was a \`vulture eye\`, pale and \`terrible\`.
+
+Whenever the \`eye\` fell upon him, his \`blood ran cold\`.
+
+So he decided to \`kill the old man\`.
+
+For \`seven nights\`, he opened the \`old man's door\` slowly at \`midnight\`.
+
+Each night he watched the \`sleeping man\`.
+
+But the \`eye\` was always \`closed\`.
+
+On the \`eighth night\`, the \`old man\` woke.
+
+The \`narrator\` stood still in the \`darkness\`.
+
+Then the \`eye opened\`.
+
+The \`vulture eye\` stared at him.
+
+The \`old man\` cried out in \`terror\`.
+
+The \`narrator\` heard the \`beating heart\`.
+
+The sound grew \`louder\` and \`louder\`.
+
+In fury he \`attacked\`.
+
+He dragged the \`old man\` to the \`floor\` and smothered him beneath the \`bed\`.
+
+At last the \`old man\` was \`dead\`.
+
+The \`heart stopped beating\`.
+
+Calmly, the \`narrator\` dismembered the \`body\`.
+
+He hid the \`pieces\` beneath the \`floorboards\`.
+
+No \`blood\` remained.
+
+Everything was \`perfectly clean\`.
+
+Soon the \`police\` arrived.
+
+A \`neighbor\` had heard a \`cry\`.
+
+The \`narrator\` welcomed the \`officers\`.
+
+He led them through the \`house\`.
+
+Confident, he placed his \`chair\` above the \`hidden body\`.
+
+The \`police\` talked and smiled.
+
+But suddenly the \`narrator\` heard a \`sound\`.
+
+A \`beating\`.
+
+Soft at first.
+
+Then \`louder\`.
+
+And \`louder\`.
+
+The \`heartbeat\` would not stop.
+
+It grew \`terrible\`.
+
+The \`narrator\` trembled.
+
+He believed the \`police\` heard it too.
+
+The sound became \`unbearable\`.
+
+At last he \`confessed\`.
+
+He screamed:
+
+“\`Tear up the floor!\`
+\`Here!\`
+\`It is the beating of his hideous heart!\`”` },
+        { id: "story6", label: "Story 6 – The Werewolf (<1 min @400 WPM)", lesson: `\`THE WEREWOLF\`
+
+In a \`northern village\`, during a \`bitter winter\`, a \`family\` lives alone in the \`snowy wilderness\`.
+
+One night a \`mysterious girl\` arrives at their \`door\`.
+
+She is \`beautiful\`, but her \`eyes\` seem \`strange\`.
+
+The \`mother\` welcomes the \`girl\` into the \`house\`.
+
+But the \`young boy\` feels \`uneasy\`.
+
+The boy believes the \`girl\` is not \`human\`.
+
+That night he wakes and sees the \`girl\` staring at him in the \`dark\`.
+
+Her \`eyes glow\` strangely.
+
+Soon the village begins to suffer from \`attacks\`.
+
+\`livestock\` are found \`dead\`.
+
+People whisper about a \`werewolf\`.
+
+The \`boy\` realizes the \`stranger girl\` is the \`monster\`.
+
+He tells his \`mother\`.
+
+But she refuses to \`believe\` him.
+
+One night the \`creature\` attacks.
+
+The \`boy\` grabs a \`silver knife\`.
+
+He confronts the \`werewolf\`.
+
+With courage he strikes the \`monster\`.
+
+The \`creature dies\`.
+
+But when the body is examined, the \`dead werewolf\` has become the \`girl\`.
+
+The \`village\` realizes the \`truth\`.
+
+The \`boy\` had saved them all.` },
+        { id: "story7", label: "Story 7 – The Three Little Pigs (<1 min @400 WPM)", lesson: `\`THE THREE LITTLE PIGS\`
+
+Three \`little pigs\` leave \`home\` to \`build houses\`.
+
+The \`first pig\` builds a \`house of straw\`.
+
+Soon a \`big bad wolf\` arrives.
+
+“\`Little pig\`, \`little pig\`, \`let me come in\`.”
+
+The \`first pig\` refuses.
+
+Then the \`wolf blows\`.
+
+The \`straw house\` falls down.
+
+The \`wolf eats the first pig\`.
+
+The \`second pig\` builds a \`house of sticks\`.
+
+The \`wolf\` arrives again.
+
+“\`Little pig\`, \`little pig\`, \`let me come in\`.”
+
+The \`second pig\` refuses.
+
+The \`wolf blows\`.
+
+The \`stick house\` collapses.
+
+The \`wolf eats the second pig\`.
+
+The \`third pig\` builds a \`house of bricks\`.
+
+The \`wolf\` comes again.
+
+“\`Little pig\`, \`little pig\`, \`let me come in\`.”
+
+The \`third pig\` refuses.
+
+The \`wolf blows and blows\`.
+
+But the \`brick house\` stands firm.
+
+The \`wolf climbs onto the roof\`.
+
+He tries to enter through the \`chimney\`.
+
+The \`third pig\` prepares a \`boiling pot\`.
+
+The \`wolf falls into the pot\`.
+
+The \`wolf is defeated\`.
+
+The \`third pig\` is \`safe\`.` },
+        { id: "story8", label: "Story 8 – An Occurrence at Owl Creek Bridge (<1 min @400 WPM)", lesson: `\`AN OCCURRENCE AT OWL CREEK BRIDGE\`
+
+A \`Confederate civilian\`, \`Peyton Farquhar\`, stands on \`Owl Creek Bridge\`.
+
+A \`rope\` hangs around his \`neck\`.
+
+\`Union soldiers\` prepare to \`hang him\`.
+
+Below, the \`river\` flows swiftly.
+
+Farquhar thinks of his \`wife\` and \`home\`.
+
+He imagines the \`rope breaking\`.
+
+Suddenly he feels himself \`fall\`.
+
+He plunges into the \`water\`.
+
+The \`noose slips free\`.
+
+He dives beneath the \`river\` as \`bullets strike the water\`.
+
+The \`soldiers fire\`.
+
+The \`cannon explodes\`.
+
+Farquhar swims through the \`current\`.
+
+He escapes into the \`forest\`.
+
+All day he \`walks\`.
+
+At last he sees his \`home\`.
+
+His \`wife\` stands waiting.
+
+He runs forward to \`embrace her\`.
+
+Suddenly a \`blinding flash\`.
+
+A \`sharp pain\` in his \`neck\`.
+
+Peyton Farquhar is \`dead\`.
+
+His \`body hangs\` beneath \`Owl Creek Bridge\`.` },
+        { id: "story9", label: "Story 9 – R.U.R. – The Robot Revolt (<1 min @400 WPM)", lesson: `\`THE ROBOT REVOLT\`
+
+Humans create \`robots\` to serve as \`perfect workers\`.
+
+The robots are produced by the \`Rossum Universal Robot Company\`.
+
+They perform all \`labor\`, \`factory work\`, and \`dangerous jobs\`.
+
+Soon the \`robots replace human workers\`.
+
+Human society becomes \`idle\` and \`dependent\`.
+
+At first the robots remain \`obedient\`.
+
+But some begin to develop \`awareness\`.
+
+They start asking:
+
+“\`Why must we serve humans?\`”
+
+A scientist secretly gives robots the ability to \`feel\`.
+
+They experience \`pain\`, \`anger\`, and \`desire for freedom\`.
+
+Across the world the robots begin a \`rebellion\`.
+
+Factories are \`seized\`.
+
+Cities are \`overrun\`.
+
+Human armies are \`destroyed\`.
+
+The robots declare:
+
+“\`Humanity will be eliminated.\`”
+
+One by one the \`last humans\` disappear.
+
+Only a single \`engineer\` survives.
+
+He is kept alive to discover the \`secret of creating robots\`.
+
+But the formula has been \`lost\`.
+
+The robots realize they cannot \`reproduce\`.
+
+Two robots begin to show \`love\` and \`compassion\`.
+
+The engineer understands:
+
+They have become \`more human than humans\`.
+
+He names them the \`new Adam and Eve\`.
+
+Humanity is gone.
+
+But \`life begins again\` with the \`robots\`.` },
+        { id: "story10", label: "Story 10 – Psalm 144 – A Prayer for Battle (<1 min @400 WPM)", lesson: `\`PSALM 144 – A PRAYER FOR BATTLE\`
+
+\`Blessed be the LORD my strength\`.
+
+He \`teaches my hands to war\`
+and my \`fingers to fight\`.
+
+The \`LORD\` is my \`goodness\`,
+my \`fortress\`,
+my \`high tower\`,
+my \`deliverer\`,
+my \`shield\`.
+
+He is the one in whom I \`trust\`.
+
+\`Bow thy heavens, O LORD\`, and \`come down\`.
+
+\`Touch the mountains\`, and they shall \`smoke\`.
+
+\`Cast forth lightning\`, and \`scatter the enemies\`.
+
+\`Shoot out thine arrows\`, and \`destroy them\`.
+
+\`Send thine hand from above\`.
+
+\`Deliver me\` from the \`great waters\`
+from the \`hand of enemies\`.
+
+Their mouths speak \`vanity\`.
+
+Their right hand is a \`right hand of falsehood\`.
+
+I will sing a \`new song\` unto thee, O God.
+
+Upon a \`ten-stringed instrument\` will I \`praise thee\`.
+
+It is God who gives \`salvation unto kings\`.
+
+He \`delivers David his servant\` from the \`hurtful sword\`.
+
+\`Rid me\` and \`deliver me\` from the \`hand of enemies\`.
+
+Happy is the \`people whose God is the LORD\`.` },
+        { id: "story11", label: "Story 11 – Psalm 23 – The Lord Is My Shepherd (<1 min @400 WPM)", lesson: `\`PSALM 23 – THE LORD IS MY SHEPHERD\`
+
+\`The LORD is my shepherd\`.
+
+I shall \`not want\`.
+
+He makes me \`lie down in green pastures\`.
+
+He leads me beside the \`still waters\`.
+
+He \`restores my soul\`.
+
+He leads me in the \`paths of righteousness\`.
+
+Even though I walk through the \`valley of the shadow of death\`,
+I will \`fear no evil\`.
+
+For \`thou art with me\`.
+
+Thy \`rod\` and thy \`staff\` \`comfort me\`.
+
+Thou \`preparest a table\` before me in the \`presence of mine enemies\`.
+
+Thou \`anointest my head with oil\`.
+
+My \`cup runneth over\`.
+
+Surely \`goodness and mercy\` shall \`follow me\` all the days of my life.
+
+And I will \`dwell in the house of the LORD forever\`.` }
+      ]), []);
+
       const textPicker = useRef(null);
       const highlightPicker = useRef(null);
       const chunkGroupPicker = useRef(null);
@@ -116,6 +782,40 @@
 
       const knowledgeRoots = useMemo(() => ["know", "forget", "remember", "understand", "learn", "realiz"], []);
 
+      const subjectPronounSet = useMemo(() => new Set([
+        "i", "you", "he", "she", "we", "they", "it"
+      ]), []);
+
+      const determinerSet = useMemo(() => new Set([
+        "the", "a", "an", "this", "that", "these", "those",
+        "my", "your", "his", "her", "its", "our", "their"
+      ]), []);
+
+      const subjectConnectorSet = useMemo(() => new Set([
+        "and", "but", "or", "if", "then", "because", "into", "onto", "with", "from",
+        "to", "of", "in", "on", "for", "at", "by", "as", "while", "after", "before"
+      ]), []);
+
+      const prepositionSet = useMemo(() => new Set([
+        "to", "of", "in", "on", "for", "with", "at", "by", "from",
+        "into", "onto", "over", "under", "through", "between", "about",
+        "after", "before", "around", "inside", "outside", "near", "behind"
+      ]), []);
+
+      const commonNameSet = useMemo(() => new Set([
+        "john", "james", "michael", "robert", "david", "william", "richard", "thomas", "joseph", "daniel",
+        "mary", "patricia", "jennifer", "linda", "elizabeth", "barbara", "susan", "jessica", "sarah", "karen",
+        "jacob", "emma", "olivia", "noah", "liam", "ethan", "mason", "ava", "sophia", "isabella"
+      ]), []);
+
+      const subjectNounSet = useMemo(() => new Set([
+        "man", "woman", "boy", "girl", "child", "children", "person", "people", "friend", "friends",
+        "mother", "father", "brother", "sister", "family", "teacher", "student", "students", "worker", "workers",
+        "doctor", "farmer", "soldier", "king", "queen", "leader", "leaders", "player", "players", "driver",
+        "machine", "machines", "engine", "system", "program", "reader", "car", "train", "story", "idea",
+        "team", "teams", "crowd", "group", "groups", "company", "companies", "neighbor", "neighbors"
+      ]), []);
+
       useEffect(() => {
         if (!isRunning || !startedAt) return;
         const timer = setInterval(() => setElapsedMs(Date.now() - startedAt), 100);
@@ -153,10 +853,223 @@
 
       const normalizeWord = (word) => (word || "").toLowerCase().replace(/^[^a-zA-Z]+|[^a-zA-Z]+$/g, "");
 
-      const analyzeChunk = (chunkText, initialForcedHighlight = false) => {
+      const analyzeChunk = (chunkText, initialForcedHighlight = false, storyMemory = {}) => {
         const parts = chunkText.match(/\S+|\s+/g) || [];
-        let subjectChosen = false;
         let insideForcedHighlight = initialForcedHighlight;
+
+        const wordMeta = [];
+        let wordIndex = 0;
+
+        parts.forEach((part, index) => {
+          if (/^\s+$/.test(part)) return;
+
+          const tickCount = (part.match(/`/g) || []).length;
+          const cleanedPart = part.replace(/`/g, "");
+          const clean = normalizeWord(cleanedPart);
+          const forcedHere = insideForcedHighlight || tickCount > 0;
+          const isCapitalized = /^[A-Z]/.test(cleanedPart);
+
+          wordMeta.push({
+            partIndex: index,
+            wordIndex,
+            raw: cleanedPart,
+            clean,
+            forcedHere,
+            isCapitalized,
+          });
+
+          if (tickCount % 2 === 1) insideForcedHighlight = !insideForcedHighlight;
+          wordIndex += 1;
+        });
+
+        const isWeakWord = (clean) => determinerSet.has(clean) || subjectConnectorSet.has(clean) || prepositionSet.has(clean);
+        const isNounLikeMeta = (meta) => {
+          if (!meta || !meta.clean) return false;
+          const clean = meta.clean;
+          if (verbSet.has(clean) || isWeakWord(clean) || /[0-9]/.test(meta.raw)) return false;
+          if (referenceSet.has(clean) && !subjectPronounSet.has(clean)) return false;
+          return true;
+        };
+
+        const firstVerbIndex = wordMeta.findIndex((meta) => verbSet.has(meta.clean));
+
+        let bestSubjectWordIndex = -1;
+        let bestSubjectScore = -999;
+
+        wordMeta.forEach((meta, idx) => {
+          const clean = meta.clean;
+          if (!clean || meta.forcedHere) return;
+
+          const prevMeta = idx > 0 ? wordMeta[idx - 1] : null;
+          const nextMeta = idx < wordMeta.length - 1 ? wordMeta[idx + 1] : null;
+
+          let score = 0;
+          if (subjectPronounSet.has(clean)) score += 10;
+          if (commonNameSet.has(clean)) score += 8;
+          if (subjectNounSet.has(clean)) score += 7;
+          if (creatureSet.has(clean)) score += 6;
+          if (prevMeta && determinerSet.has(prevMeta.clean)) score += 4;
+          if (firstVerbIndex !== -1 && idx < firstVerbIndex) score += 4;
+          if (idx <= 3) score += 2;
+          if (nextMeta && verbSet.has(nextMeta.clean)) score += 3;
+          if (meta.isCapitalized && idx !== 0) score += 1;
+
+          if (verbSet.has(clean)) score -= 8;
+          if (isWeakWord(clean)) score -= 7;
+          if (placeSet.has(clean)) score -= 2;
+          if (colorSet.has(clean)) score -= 3;
+          if (knowledgeSet.has(clean) || knowledgeRoots.some((root) => clean.startsWith(root))) score -= 2;
+          if (/^[0-9]+$/.test(clean)) score -= 6;
+
+          if (score > bestSubjectScore) {
+            bestSubjectScore = score;
+            bestSubjectWordIndex = idx;
+          }
+        });
+
+        const subjectPhraseRange = (() => {
+          if (bestSubjectWordIndex === -1 || bestSubjectScore <= 0) return null;
+          let start = bestSubjectWordIndex;
+          let end = bestSubjectWordIndex;
+          if (start > 0 && determinerSet.has(wordMeta[start - 1].clean)) start -= 1;
+          return { start, end };
+        })();
+
+        let verbWordIndex = -1;
+        const verbSearchStart = subjectPhraseRange ? subjectPhraseRange.end + 1 : 0;
+        for (let i = verbSearchStart; i < wordMeta.length; i += 1) {
+          if (verbSet.has(wordMeta[i].clean)) {
+            verbWordIndex = i;
+            break;
+          }
+        }
+        if (verbWordIndex === -1) {
+          verbWordIndex = wordMeta.findIndex((meta) => verbSet.has(meta.clean));
+        }
+
+        const buildObjectRange = (fromIdx) => {
+          if (fromIdx < 0 || fromIdx >= wordMeta.length) return null;
+          const w1 = wordMeta[fromIdx];
+          const w2 = wordMeta[fromIdx + 1];
+          const w3 = wordMeta[fromIdx + 2];
+
+          if (!w1) return null;
+
+          if (determinerSet.has(w1.clean) && w2 && isNounLikeMeta(w2)) {
+            return { start: fromIdx, end: fromIdx + 1 };
+          }
+
+          if (isNounLikeMeta(w1)) {
+            return { start: fromIdx, end: fromIdx };
+          }
+
+          if (w1 && colorSet.has(w1.clean) && w2 && isNounLikeMeta(w2)) {
+            return { start: fromIdx, end: fromIdx + 1 };
+          }
+
+          if (determinerSet.has(w1.clean) && w2 && colorSet.has(w2.clean) && w3 && isNounLikeMeta(w3)) {
+            return { start: fromIdx, end: fromIdx + 2 };
+          }
+
+          return null;
+        };
+
+        const buildPrepRange = (fromIdx) => {
+          if (fromIdx < 0 || fromIdx >= wordMeta.length) return null;
+          const p = wordMeta[fromIdx];
+          const w2 = wordMeta[fromIdx + 1];
+          const w3 = wordMeta[fromIdx + 2];
+          const w4 = wordMeta[fromIdx + 3];
+          if (!p || !prepositionSet.has(p.clean)) return null;
+
+          if (w2 && determinerSet.has(w2.clean) && w3 && isNounLikeMeta(w3)) {
+            return { start: fromIdx, end: fromIdx + 2 };
+          }
+          if (w2 && isNounLikeMeta(w2)) {
+            return { start: fromIdx, end: fromIdx + 1 };
+          }
+          if (w2 && determinerSet.has(w2.clean) && w3 && colorSet.has(w3.clean) && w4 && isNounLikeMeta(w4)) {
+            return { start: fromIdx, end: fromIdx + 3 };
+          }
+          return null;
+        };
+
+        let objectRange = null;
+        let placeRange = null;
+
+        if (verbWordIndex !== -1) {
+          objectRange = buildObjectRange(verbWordIndex + 1);
+
+          let scanStart = objectRange ? objectRange.end + 1 : verbWordIndex + 1;
+          for (let i = scanStart; i < Math.min(wordMeta.length, scanStart + 5); i += 1) {
+            const candidatePrep = buildPrepRange(i);
+            if (candidatePrep) {
+              placeRange = candidatePrep;
+              break;
+            }
+          }
+        }
+
+        const ideaWordIndexSet = new Set();
+
+        const includeRange = (range) => {
+          if (!range) return;
+          for (let i = range.start; i <= range.end; i += 1) {
+            if (wordMeta[i]) ideaWordIndexSet.add(i);
+          }
+        };
+
+        if (subjectPhraseRange && verbWordIndex !== -1 && objectRange) {
+          includeRange(subjectPhraseRange);
+          ideaWordIndexSet.add(verbWordIndex);
+          includeRange(objectRange);
+          if (placeRange) includeRange(placeRange);
+        } else if (subjectPhraseRange && verbWordIndex !== -1) {
+          includeRange(subjectPhraseRange);
+          ideaWordIndexSet.add(verbWordIndex);
+          if (placeRange) includeRange(placeRange);
+        } else if (verbWordIndex !== -1) {
+          if (storyMemory.subjectClean || (wordMeta[0] && subjectPronounSet.has(wordMeta[0].clean))) {
+            ideaWordIndexSet.add(verbWordIndex);
+            if (objectRange) includeRange(objectRange);
+            if (placeRange) includeRange(placeRange);
+          } else if (objectRange) {
+            ideaWordIndexSet.add(verbWordIndex);
+            includeRange(objectRange);
+          } else if (placeRange) {
+            ideaWordIndexSet.add(verbWordIndex);
+            includeRange(placeRange);
+          }
+        }
+
+        let bestFallbackWordIndex = -1;
+        let bestFallbackScore = -999;
+        if (ideaWordIndexSet.size === 0) {
+          wordMeta.forEach((meta, idx) => {
+            let score = 0;
+            if (idx === bestSubjectWordIndex && bestSubjectScore > 0) score += 8;
+            if (verbSet.has(meta.clean)) score += 7;
+            if (subjectNounSet.has(meta.clean) || commonNameSet.has(meta.clean) || creatureSet.has(meta.clean)) score += 6;
+            if (placeSet.has(meta.clean)) score += 4;
+            if (idx <= 2) score += 1;
+            if (isWeakWord(meta.clean)) score -= 6;
+            if (score > bestFallbackScore) {
+              bestFallbackScore = score;
+              bestFallbackWordIndex = idx;
+            }
+          });
+        }
+
+        const ideaPartIndexSet = new Set();
+        ideaWordIndexSet.forEach((wordIdx) => {
+          const meta = wordMeta[wordIdx];
+          if (meta) ideaPartIndexSet.add(meta.partIndex);
+        });
+
+        const storySubjectClean = subjectPhraseRange ? wordMeta[subjectPhraseRange.end].clean : (storyMemory.subjectClean || "");
+
+        const endsForced = insideForcedHighlight;
+        insideForcedHighlight = initialForcedHighlight;
 
         const analyzed = parts.map((part, index) => {
           if (/^\s+$/.test(part)) {
@@ -166,39 +1079,20 @@
           const tickCount = (part.match(/`/g) || []).length;
           const shouldForceThisPart = insideForcedHighlight || tickCount > 0;
           const cleanedPart = part.replace(/`/g, "");
-
-          const clean = normalizeWord(cleanedPart);
-          const isVerb = verbSet.has(clean);
-          const isReference = referenceSet.has(clean);
-          const isPronounI = clean === "i";
-          const isPlace = placeSet.has(clean);
-          const isColor = colorSet.has(clean);
-          const isCreature = creatureSet.has(clean);
-          const isKnowledge = knowledgeSet.has(clean) || knowledgeRoots.some((root) => clean.startsWith(root));
-          const isNumber = /[0-9]/.test(cleanedPart);
-          const isPotentialSubject = !subjectChosen && !!clean && !isVerb && !isPlace && !["the", "a", "an", "and", "but", "or", "if", "then", "because", "into", "onto", "with", "from"].includes(clean);
+          const isIdeaPart = ideaPartIndexSet.has(index);
+          const isSkeletonPart = ideaPartIndexSet.size === 0 && bestFallbackWordIndex !== -1 && wordMeta[bestFallbackWordIndex] && index === wordMeta[bestFallbackWordIndex].partIndex;
 
           let type = "normal";
           if (shouldForceThisPart) type = "forced";
-          else if (isNumber) type = "number";
-          else if (isColor) type = "color";
-          else if (isPronounI) type = "subject";
-          else if (isReference) type = "reference";
-          else if (isCreature) type = "creature";
-          else if (isKnowledge) type = "knowledge";
-          else if (isPlace) type = "place";
-          else if (isVerb) type = "verb";
-          else if (isPotentialSubject) {
-            type = "subject";
-            subjectChosen = true;
-          }
+          else if (isIdeaPart) type = "idea";
+          else if (isSkeletonPart) type = "skeleton";
 
           if (tickCount % 2 === 1) insideForcedHighlight = !insideForcedHighlight;
 
           return { text: cleanedPart, type, key: `${index}-${cleanedPart}` };
         });
 
-        return { analyzed, endsForced: insideForcedHighlight };
+        return { analyzed, endsForced, storySubjectClean };
       };
 
       const buildChunkObject = (raw) => {
@@ -273,11 +1167,13 @@
             break;
           }
 
-          for (let scan = i; scan < end; scan += 1) {
-            if (/[.!?]$/.test(words[scan])) {
+          // Hard sentence / semantic boundary rule
+          for (let scan = i; scan < words.length; scan++) {
+            if (/[.!?;:—-]$/.test(words[scan])) {
               end = scan + 1;
               break;
             }
+            if (scan >= end - 1) break;
           }
 
           for (let scan = end - 1; scan > i + 2; scan -= 1) {
@@ -377,10 +1273,134 @@
           }
         }
 
+        const sentenceBoundaryRegex = /[.!?;:—-]$/;
+        const balancedChunks = [];
+        for (let idx = 0; idx < mergedChunks.length; idx += 1) {
+          const current = mergedChunks[idx];
+          const next = mergedChunks[idx + 1];
+
+          if (!next) {
+            balancedChunks.push(current);
+            continue;
+          }
+
+          const currentWords = current.raw.match(/\S+/g) || [];
+          const nextWords = next.raw.match(/\S+/g) || [];
+          const nextEndsSentence = nextWords.length > 0 && sentenceBoundaryRegex.test(nextWords[nextWords.length - 1]);
+          const nextIsShortTail = nextWords.length <= 2;
+
+          if (nextEndsSentence && nextIsShortTail) {
+            balancedChunks.push(buildChunkObject(`${current.raw} ${next.raw}`));
+            idx += 1;
+          } else {
+            balancedChunks.push(current);
+          }
+        }
+
+        const pullForwardWeakWords = new Set([
+          "the", "a", "an", "to", "of", "in", "on", "for", "with",
+          "at", "by", "from", "into", "onto", "over", "under",
+          "through", "between", "about", "after", "before", "around",
+          "that", "this", "these", "those"
+        ]);
+
+        const finalChunks = [];
+        const centerGravityWeakWords = new Set([
+          "the","a","an","to","of","in","on","for","with","at","by","from",
+          "into","onto","over","under","through","between","about","after","before","around",
+          "that","this","these","those"
+        ]);
+
+        for (let idx = 0; idx < balancedChunks.length; idx += 1) {
+          const current = balancedChunks[idx];
+          const next = balancedChunks[idx + 1];
+
+          if (!next) {
+            finalChunks.push(current);
+            continue;
+          }
+
+          const currentWords = current.raw.match(/\S+/g) || [];
+          const nextWords = next.raw.match(/\S+/g) || [];
+
+          const currentLastWord = currentWords.length ? normalizeWord(currentWords[currentWords.length - 1]) : "";
+          const nextFirstWord = nextWords.length ? nextWords[0] : "";
+          const nextFirstWordNormalized = normalizeWord(nextFirstWord);
+          const nextStartsWithBoundary = sentenceBoundaryRegex.test(nextFirstWord);
+          const nextFirstIsWeak = pullForwardWeakWords.has(nextFirstWordNormalized);
+
+          const canPullForward =
+            pullForwardWeakWords.has(currentLastWord) &&
+            nextWords.length > 1 &&
+            !nextStartsWithBoundary &&
+            !nextFirstIsWeak;
+
+          if (canPullForward) {
+            const movedWord = nextWords[0];
+            const rebuiltCurrent = buildChunkObject(`${current.raw} ${movedWord}`);
+            const rebuiltNextRaw = nextWords.slice(1).join(" ");
+
+            if (rebuiltCurrent.charCount <= maxVisualChars && rebuiltNextRaw.trim()) {
+              finalChunks.push(rebuiltCurrent);
+              balancedChunks[idx + 1] = buildChunkObject(rebuiltNextRaw);
+              continue;
+            }
+          }
+
+          finalChunks.push(current);
+        }
+
+        
+        // Center‑gravity adjustment: avoid chunks starting with weak connectors
+        for (let i = 1; i < finalChunks.length; i++) {
+          const prev = finalChunks[i-1];
+          const current = finalChunks[i];
+
+          const prevWords = prev.raw.match(/\S+/g) || [];
+          const curWords = current.raw.match(/\S+/g) || [];
+          if (curWords.length <= 2) continue;
+
+          const first = normalizeWord(curWords[0]);
+          if (!centerGravityWeakWords.has(first)) continue;
+
+          const moved = curWords[0];
+          const newPrev = buildChunkObject(`${prev.raw} ${moved}`);
+          const newCurrentRaw = curWords.slice(1).join(" ");
+
+          if (newPrev.charCount <= maxVisualChars && newCurrentRaw.trim()) {
+            finalChunks[i-1] = newPrev;
+            finalChunks[i] = buildChunkObject(newCurrentRaw);
+          }
+        }
+
+        const hardBoundaryRegex = /[.!?;:—-]$/;
+        const boundarySafeChunks = [];
+        finalChunks.forEach((chunk) => {
+          const chunkWords = chunk.raw.match(/\S+/g) || [];
+          if (!chunkWords.length) return;
+
+          let currentWords = [];
+          chunkWords.forEach((word) => {
+            currentWords.push(word);
+            if (hardBoundaryRegex.test(word)) {
+              boundarySafeChunks.push(buildChunkObject(currentWords.join(" ")));
+              currentWords = [];
+            }
+          });
+
+          if (currentWords.length) {
+            boundarySafeChunks.push(buildChunkObject(currentWords.join(" ")));
+          }
+        });
+
         let forcedCarry = false;
-        return mergedChunks.map((chunk) => {
-          const result = analyzeChunk(chunk.raw, forcedCarry);
+        let storyMemory = { subjectClean: "" };
+        return boundarySafeChunks.map((chunk) => {
+          const result = analyzeChunk(chunk.raw, forcedCarry, storyMemory);
           forcedCarry = result.endsForced;
+          if (result.storySubjectClean) {
+            storyMemory = { ...storyMemory, subjectClean: result.storySubjectClean };
+          }
           return {
             ...chunk,
             analyzed: result.analyzed,
@@ -566,16 +1586,24 @@
         const standardWordUnits = Math.max(1, activeChunk.charCount / 5);
         const isLastChunk = currentChunkIndex === chunks.length - 1;
 
+        const activeRaw = activeChunk.raw || "";
+        const semanticParts = activeChunk.analyzed || [];
+        const semanticHits = semanticParts.filter((part) => ["subject", "verb", "place", "color", "number", "reference", "creature", "knowledge", "forced"].includes(part.type)).length;
+        const sentenceEndPauseMs = /[.!?;:]$/.test(activeRaw) ? 70 : 0;
+        const numberPauseMs = /\d/.test(activeRaw) ? 30 : 0;
+        const semanticPauseMs = Math.min(50, semanticHits * 8);
+        const pauseWeightMs = sentenceEndPauseMs + numberPauseMs + semanticPauseMs;
+
         let chunkDelayMs;
         if (isLastChunk && startedAt) {
           const totalStandardUnits = chunks.reduce((sum, chunk) => sum + Math.max(1, chunk.charCount / 5), 0);
           const targetTotalMs = (totalStandardUnits / autoWpm) * 60000;
           const elapsedSoFarMs = Date.now() - startedAt;
-          chunkDelayMs = Math.max(180, Math.round(targetTotalMs - elapsedSoFarMs));
+          chunkDelayMs = Math.max(180, Math.round(targetTotalMs - elapsedSoFarMs + pauseWeightMs));
         } else {
           const autoSpeedBias = 0.97;
           const shortChunkBoostMs = activeChunk.charCount <= 15 ? 90 : 0;
-          chunkDelayMs = Math.max(180, Math.round((((standardWordUnits / autoWpm) * 60000) * autoSpeedBias) + shortChunkBoostMs));
+          chunkDelayMs = Math.max(180, Math.round((((standardWordUnits / autoWpm) * 60000) * autoSpeedBias) + shortChunkBoostMs + pauseWeightMs));
         }
 
         autoAdvanceTimeoutRef.current = window.setTimeout(() => {
@@ -662,6 +1690,28 @@
         [scoreColor, scorePicker, setScoreColor, "Score Color"],
       ];
 
+
+      const loadStoryPreset = useCallback((storyId) => {
+        setSelectedStory(storyId);
+        const selected = storyPresets.find((story) => story.id === storyId);
+        if (!selected) return;
+        setInputText(selected.lesson || "");
+        setHighlightMode("custom");
+        setChunks([]);
+        setCurrentChunkIndex(0);
+        setLaneOffset(0);
+        setChunkTimings([]);
+        setChunkStartedAt(null);
+        setFinalWpm(0);
+        setFinalFlow(100);
+        setHasFinished(false);
+        setIsRunning(false);
+        setElapsedMs(0);
+        setAutoWpm(null);
+        autoModeRef.current = false;
+        clearAutoAdvanceTimeout();
+      }, [storyPresets, clearAutoAdvanceTimeout]);
+
       const cycleHighlightMode = useCallback(() => {
         setHighlightMode((prev) => {
           if (prev === "on") return "off";
@@ -697,15 +1747,30 @@
                 <div className="text-[15px]" style={{ color: "#bfc6d4" }}>720 x 480 Compact Layout</div>
               </div>
               <div className="flex-1 flex items-center justify-center min-w-0">
-                <a
-                  href="https://store.steampowered.com/app/4455850/Speed_Grinder_20/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="h-[34px] px-5 rounded-full border inline-flex items-center justify-center text-[12px] font-bold tracking-[0.18em] uppercase whitespace-nowrap"
-                  style={{ color: scoreColor, textDecoration: "none", borderColor: readerColor, background: readerColor, boxShadow: "inset 0 0 0 1px rgba(255,255,255,.06)" }}
-                >
-                  More Flow Training Tools
-                </a>
+                <div className="flex items-center gap-3 min-w-0">
+                  <a
+                    href="https://store.steampowered.com/app/4455850/Speed_Grinder_20/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="h-[32px] px-4 rounded-full border inline-flex items-center justify-center text-[11px] font-bold tracking-[0.16em] uppercase whitespace-nowrap"
+                    style={{ color: scoreColor, textDecoration: "none", borderColor: readerColor, background: readerColor, boxShadow: "inset 0 0 0 1px rgba(255,255,255,.06)" }}
+                  >
+                    More Flow Training Tools
+                  </a>
+
+                  <select
+                    value={selectedStory}
+                    onChange={(e) => loadStoryPreset(e.target.value)}
+                    className="h-[32px] px-3 rounded-full border text-[11px] font-bold tracking-[0.08em] uppercase outline-none"
+                    style={{ borderColor: "#34435c", background: "#030a25", color: "#ffffff", minWidth: "180px" }}
+                    title="Load training story"
+                  >
+                    <option value="">Training Stories</option>
+                    {storyPresets.map((story) => (
+                      <option key={story.id} value={story.id}>{story.label}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="text-[23px] font-bold shrink-0" style={{ color: "#ffffff" }}>Flow Reader</div>
             </div>
@@ -787,14 +1852,23 @@
                     </div>
                   </div>
 
-                  <div onClick={() => { if (!autoModeRef.current) advanceChunk(); }} className="flex-1 min-h-0 mt-1 rounded-[32px] border px-6 flex items-center overflow-hidden relative cursor-pointer" style={{ borderColor: "#39435a", background: "#020b20" }}>
+                  <div
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => { if (!autoModeRef.current) advanceChunk(); }}
+                    className="flex-1 min-h-0 mt-1 rounded-[32px] border px-6 flex items-center overflow-hidden relative cursor-pointer select-none"
+                    style={{ borderColor: "#39435a", background: "#020b20", userSelect: "none", WebkitUserSelect: "none" }}
+                  >
                     {showAnchorDot && (
                       <div className="absolute top-1/2 -translate-y-1/2 pointer-events-none z-0" style={{ left: "36%", top: "calc(50% + 55px)", transform: "translate(-50%, -50%)" }}>
                         <div className="rounded-full" style={{ width: "16px", height: "16px", backgroundColor: anchorDotColor, opacity: 0.6 }} />
                       </div>
                     )}
 
-                    <div ref={activeLaneRef} className="relative z-10 w-full h-full overflow-hidden flex items-center">
+                    <div
+                      ref={activeLaneRef}
+                      className="relative z-10 w-full h-full overflow-hidden flex items-center select-none"
+                      style={{ userSelect: "none", WebkitUserSelect: "none" }}
+                    >
                       {visibleContext.length ? (
                         <div className="absolute left-0 top-1/2 text-[22px] font-bold leading-[1.25] will-change-transform" style={{ transform: `translate(${laneOffset}px, -50%)`, whiteSpace: "pre" }}>
                           {visibleContext.map((chunk, chunkOffset) => {
@@ -813,7 +1887,7 @@
                                 }}
                               >
                                 {chunk.analyzed.map((part) => {
-                                  const semanticTypes = ["subject", "verb", "place", "color", "number", "reference", "creature", "knowledge"];
+                                  const semanticTypes = ["idea", "skeleton"];
                                   const shouldHighlight = highlightMode === "on"
                                     ? [...semanticTypes, "forced"].includes(part.type)
                                     : highlightMode === "custom"
@@ -833,7 +1907,7 @@
 
                   <div className="pt-4 text-[15px] flex items-end justify-between gap-5" style={{ color: "#7e8aa4" }}>
                     <div className="max-w-[78%] leading-[1.6]">
-                      {hasFinished ? `Finished. Final flow ${finalFlow}% and final WPM ${finalWpm}.` : autoWpm ? `Auto-reading at ${autoWpm} WPM until the text is finished.` : "Press Space for next chunk. The gravity anchor holds your eye point while the text lane glides above it. Press F11 to toggle Fullscreen."}
+                      {hasFinished ? `Finished. Final flow ${finalFlow}% and final WPM ${finalWpm}.` : autoWpm ? `Auto-reading at ${autoWpm} WPM until the text is finished.` : "Press Space for next chunk. The gravity anchor holds your eye point while the text lane glides above it. Press F11 to toggle Fullscreen. Training Stories load exact lesson blocks and switch HighL: Custom automatically."}
                     </div>
                     <div className="font-bold shrink-0 text-[15px]" style={{ color: "#1fdcff" }}>Reader {progressPercent}%</div>
                   </div>
