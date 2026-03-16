@@ -9,7 +9,8 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { margin: 0; background: #000; }
+    html, body, #root { height: 100%; }
+    body { margin: 0; background: #000; overflow: hidden; }
     textarea::-webkit-scrollbar { width: 8px; }
     textarea::-webkit-scrollbar-thumb { background: rgba(120,130,160,.4); border-radius: 99px; }
   </style>
@@ -48,8 +49,36 @@
       const [copyNotice, setCopyNotice] = useState(false);
       const [showAnchorDot, setShowAnchorDot] = useState(true);
       const [anchorDotColor, setAnchorDotColor] = useState("#22d3ee");
+      const [countdownValue, setCountdownValue] = useState(null);
 
       const [selectedStory, setSelectedStory] = useState("");
+      const BASE_WIDTH = 1120;
+      const BASE_HEIGHT = 720;
+      const [uiScale, setUiScale] = useState(1);
+
+      useLayoutEffect(() => {
+        const updateScale = () => {
+          if (document.fullscreenElement) {
+            setUiScale(1);
+            return;
+          }
+          const padX = 24;
+          const padY = 24;
+          const availableWidth = Math.max(320, window.innerWidth - padX * 2);
+          const availableHeight = Math.max(320, window.innerHeight - padY * 2);
+          const nextScale = Math.min(availableWidth / BASE_WIDTH, availableHeight / BASE_HEIGHT);
+          setUiScale(nextScale);
+        };
+
+        updateScale();
+        window.addEventListener("resize", updateScale);
+        document.addEventListener("fullscreenchange", updateScale);
+        return () => {
+          window.removeEventListener("resize", updateScale);
+          document.removeEventListener("fullscreenchange", updateScale);
+        };
+      }, []);
+
 
       const storyPresets = useMemo(() => ([
         { id: "story1", label: "Story 1 – Dracula Ch.2 (<1 min @400 WPM)", lesson: `Chapter II
@@ -727,6 +756,8 @@ And I will dwell in the house of the LORD for ever.` }
       const autoAdvanceTimeoutRef = useRef(null);
       const autoModeRef = useRef(false);
       const copyNoticeTimeoutRef = useRef(null);
+      const countdownIntervalRef = useRef(null);
+      const countdownStartTimeoutRef = useRef(null);
       const appShellRef = useRef(null);
 
       const verbSet = useMemo(() => new Set([
@@ -1382,6 +1413,50 @@ And I will dwell in the house of the LORD for ever.` }
         window.dispatchEvent(event);
       }, []);
 
+      const clearCountdownTimers = useCallback(() => {
+        if (countdownIntervalRef.current) {
+          window.clearInterval(countdownIntervalRef.current);
+          countdownIntervalRef.current = null;
+        }
+        if (countdownStartTimeoutRef.current) {
+          window.clearTimeout(countdownStartTimeoutRef.current);
+          countdownStartTimeoutRef.current = null;
+        }
+      }, []);
+
+      const beginCountdown = useCallback((onComplete) => {
+        clearCountdownTimers();
+        clearAutoAdvanceTimeout();
+        setIsRunning(false);
+        setAutoWpm(null);
+        autoModeRef.current = false;
+        setCountdownValue(3);
+
+        countdownIntervalRef.current = window.setInterval(() => {
+          setCountdownValue((prev) => {
+            if (prev === null) return null;
+            if (prev <= 1) {
+              if (countdownIntervalRef.current) {
+                window.clearInterval(countdownIntervalRef.current);
+                countdownIntervalRef.current = null;
+              }
+              return null;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+
+        countdownStartTimeoutRef.current = window.setTimeout(() => {
+          countdownStartTimeoutRef.current = null;
+          if (countdownIntervalRef.current) {
+            window.clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
+          }
+          setCountdownValue(null);
+          onComplete();
+        }, 3000);
+      }, [clearAutoAdvanceTimeout, clearCountdownTimers]);
+
       const finishReading = useCallback((timingsOverride, builtChunks, elapsedOverride) => {
         const totalChars = builtChunks.reduce((sum, chunk) => sum + chunk.charCount, 0);
         const computedWpm = autoWpm ? autoWpm : (elapsedOverride > 0 ? Math.round((totalChars / 5) / (elapsedOverride / 60000)) : 0);
@@ -1415,7 +1490,7 @@ And I will dwell in the house of the LORD for ever.` }
         setChunkStartedAt(now);
       }, [isRunning, chunks, chunkStartedAt, chunkTimings, currentChunkIndex, startedAt, elapsedMs, finishReading]);
 
-      const startReading = useCallback(() => {
+      const performStartReading = useCallback(() => {
         const built = buildChunks(inputText);
         setChunks(built);
         setCurrentChunkIndex(0);
@@ -1434,7 +1509,7 @@ And I will dwell in the house of the LORD for ever.` }
         setIsRunning(built.length > 0);
       }, [buildChunks, inputText, clearAutoAdvanceTimeout]);
 
-      const startAutoRead = useCallback((wpmTarget) => {
+      const performStartAutoRead = useCallback((wpmTarget) => {
         const built = buildChunks(inputText);
         setChunks(built);
         setCurrentChunkIndex(0);
@@ -1453,14 +1528,46 @@ And I will dwell in the house of the LORD for ever.` }
         setIsRunning(built.length > 0);
       }, [buildChunks, inputText, clearAutoAdvanceTimeout]);
 
+      const startReading = useCallback(() => {
+        const built = buildChunks(inputText);
+        if (!built.length) {
+          clearCountdownTimers();
+          setCountdownValue(null);
+          setChunks([]);
+          setCurrentChunkIndex(0);
+          setLaneOffset(0);
+          setIsRunning(false);
+          return;
+        }
+        beginCountdown(() => performStartReading());
+      }, [buildChunks, inputText, beginCountdown, clearCountdownTimers, performStartReading]);
+
+      const startAutoRead = useCallback((wpmTarget) => {
+        const built = buildChunks(inputText);
+        if (!built.length) {
+          clearCountdownTimers();
+          setCountdownValue(null);
+          setChunks([]);
+          setCurrentChunkIndex(0);
+          setLaneOffset(0);
+          setIsRunning(false);
+          return;
+        }
+        beginCountdown(() => performStartAutoRead(wpmTarget));
+      }, [buildChunks, inputText, beginCountdown, clearCountdownTimers, performStartAutoRead]);
+
       const stopReading = useCallback(() => {
+        clearCountdownTimers();
+        setCountdownValue(null);
         setIsRunning(false);
         setAutoWpm(null);
         autoModeRef.current = false;
         clearAutoAdvanceTimeout();
-      }, [clearAutoAdvanceTimeout]);
+      }, [clearAutoAdvanceTimeout, clearCountdownTimers]);
 
       const clearAll = useCallback(() => {
+        clearCountdownTimers();
+        setCountdownValue(null);
         setInputText("");
         setChunks([]);
         setCurrentChunkIndex(0);
@@ -1475,7 +1582,7 @@ And I will dwell in the house of the LORD for ever.` }
         setAutoWpm(null);
         autoModeRef.current = false;
         clearAutoAdvanceTimeout();
-      }, [clearAutoAdvanceTimeout]);
+      }, [clearAutoAdvanceTimeout, clearCountdownTimers]);
 
       const copyContactLink = useCallback(async () => {
         try {
@@ -1584,6 +1691,12 @@ And I will dwell in the house of the LORD for ever.` }
       }, [currentChunkIndex, chunks, highlightMode]);
 
       useEffect(() => {
+        return () => {
+          clearCountdownTimers();
+        };
+      }, [clearCountdownTimers]);
+
+      useEffect(() => {
         const tests = () => {
           console.assert(normalizeWord("Hello!") === "hello", "normalizeWord should strip punctuation");
           const forced = analyzeChunk("This is `very important` text");
@@ -1667,32 +1780,49 @@ And I will dwell in the house of the LORD for ever.` }
           : "HighL:Custom";
 
       return (
-        <div className="min-h-screen bg-black flex items-center justify-center p-4 text-white font-sans">
+        <div className="min-h-screen bg-black flex items-center justify-center p-3 text-white font-sans" style={{ overflow: "hidden" }}>
           <div
-            ref={appShellRef}
-            className="w-[1120px] h-[720px] border rounded-[30px] overflow-hidden shadow-2xl grid"
+            className="relative"
             style={{
-              backgroundColor: bgColor,
-              borderColor: "#2d3748",
-              gridTemplateRows: "58px 128px 1fr 126px",
-              boxShadow: "0 24px 70px rgba(0,0,0,.45)",
-              width: isFullscreen ? "100vw" : "1120px",
-              height: isFullscreen ? "100vh" : "720px",
-              borderRadius: isFullscreen ? "0px" : "30px",
+              width: isFullscreen ? "100vw" : `${BASE_WIDTH * uiScale}px`,
+              height: isFullscreen ? "100vh" : `${BASE_HEIGHT * uiScale}px`,
             }}
           >
-            <div className="px-6 border-b flex items-center gap-6" style={{ borderColor: "#273142", background: "linear-gradient(to right, rgba(12,12,18,.98), rgba(20,20,26,.98))" }}>
-              <div className="flex items-center gap-6 shrink-0">
-                <div className="text-[16px] tracking-[0.40em] uppercase" style={{ color: "#17d6ff" }}>Read Speed System</div>
-                <div className="text-[15px]" style={{ color: "#bfc6d4" }}>720 x 480 Compact Layout</div>
+            <div
+              ref={appShellRef}
+              className="border rounded-[30px] overflow-hidden shadow-2xl grid"
+              style={{
+                backgroundColor: bgColor,
+                borderColor: "#2d3748",
+                gridTemplateRows: "58px 128px 1fr 126px",
+                boxShadow: "0 24px 70px rgba(0,0,0,.45)",
+                width: isFullscreen ? "100vw" : `${BASE_WIDTH}px`,
+                height: isFullscreen ? "100vh" : `${BASE_HEIGHT}px`,
+                borderRadius: isFullscreen ? "0px" : "30px",
+                transform: isFullscreen ? "none" : `scale(${uiScale})`,
+                transformOrigin: "top left",
+              }}
+            >
+            <div className="px-4 border-b flex items-center gap-4 min-w-0 overflow-hidden" style={{ borderColor: "#273142", background: "linear-gradient(to right, rgba(12,12,18,.98), rgba(20,20,26,.98))" }}>
+              <div className="flex items-center gap-4 min-w-0 shrink">
+                <a
+                  href="https://www.youtube.com/playlist?list=PL1WrxPu9pNzy659plnMTQ0hYUb6gKnpeL"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="h-[32px] px-4 rounded-full border inline-flex items-center justify-center text-[11px] font-bold tracking-[0.18em] uppercase whitespace-nowrap shrink-0"
+                  style={{ color: "#17d6ff", textDecoration: "none", borderColor: "#17d6ff", background: "#030a25", boxShadow: "inset 0 0 0 1px rgba(255,255,255,.04)" }}
+                >
+                  How to use FlowReader
+                </a>
+                <div className="text-[15px] whitespace-nowrap shrink-0" style={{ color: "#bfc6d4" }}>720 x 480 Compact Layout</div>
               </div>
-              <div className="flex-1 flex items-center justify-center min-w-0">
-                <div className="flex items-center gap-3 min-w-0">
+              <div className="flex-1 flex items-center justify-center min-w-0 overflow-hidden">
+                <div className="flex items-center gap-3 min-w-0 overflow-hidden">
                   <a
                     href="https://store.steampowered.com/app/4455850/Speed_Grinder_20/"
                     target="_blank"
                     rel="noreferrer"
-                    className="h-[32px] px-4 rounded-full border inline-flex items-center justify-center text-[11px] font-bold tracking-[0.16em] uppercase whitespace-nowrap"
+                    className="h-[32px] px-4 rounded-full border inline-flex items-center justify-center text-[11px] font-bold tracking-[0.16em] uppercase whitespace-nowrap shrink-0"
                     style={{ color: scoreColor, textDecoration: "none", borderColor: readerColor, background: readerColor, boxShadow: "inset 0 0 0 1px rgba(255,255,255,.06)" }}
                   >
                     More Flow Training Tools
@@ -1701,8 +1831,8 @@ And I will dwell in the house of the LORD for ever.` }
                   <select
                     value={selectedStory}
                     onChange={(e) => loadStoryPreset(e.target.value)}
-                    className="h-[32px] px-3 rounded-full border text-[11px] font-bold tracking-[0.08em] uppercase outline-none"
-                    style={{ borderColor: "#34435c", background: "#030a25", color: "#ffffff", minWidth: "180px" }}
+                    className="h-[32px] px-3 rounded-full border text-[11px] font-bold tracking-[0.08em] uppercase outline-none min-w-0"
+                    style={{ borderColor: "#34435c", background: "#030a25", color: "#ffffff", width: "300px", maxWidth: "100%" }}
                     title="Load training story"
                   >
                     <option value="">Training Stories</option>
@@ -1712,7 +1842,7 @@ And I will dwell in the house of the LORD for ever.` }
                   </select>
                 </div>
               </div>
-              <div className="text-[23px] font-bold shrink-0" style={{ color: "#ffffff" }}>Flow Reader</div>
+              <div className="text-[23px] font-bold min-w-0 shrink text-right truncate" style={{ color: "#ffffff", maxWidth: "150px" }}>Flow Reader</div>
             </div>
 
             <div className="px-4 py-3 border-b" style={{ borderColor: "#273142", background: "rgba(20,20,26,.92)" }}>
@@ -1788,7 +1918,7 @@ And I will dwell in the house of the LORD for ever.` }
                       })}
                     </div>
                     <div className="text-[15px] px-3 py-1 rounded-full border font-bold shrink-0" style={{ color: "#ffd400", borderColor: "rgba(250,204,21,.45)", backgroundColor: "rgba(250,204,21,.06)" }}>
-                      {hasFinished ? "Complete" : isRunning ? (autoWpm ? `${autoWpm} WPM` : "Live") : "Ready"}
+                      {hasFinished ? "Complete" : countdownValue !== null ? `Starting ${countdownValue}` : isRunning ? (autoWpm ? `${autoWpm} WPM` : "Live") : "Ready"}
                     </div>
                   </div>
 
@@ -1801,6 +1931,23 @@ And I will dwell in the house of the LORD for ever.` }
                     {showAnchorDot && (
                       <div className="absolute top-1/2 -translate-y-1/2 pointer-events-none z-0" style={{ left: "36%", top: "calc(50% + 55px)", transform: "translate(-50%, -50%)" }}>
                         <div className="rounded-full" style={{ width: "16px", height: "16px", backgroundColor: anchorDotColor, opacity: 0.6 }} />
+                      </div>
+                    )}
+
+                    {countdownValue !== null && (
+                      <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+                        <div
+                          className="min-w-[120px] h-[120px] rounded-full flex items-center justify-center text-[64px] font-extrabold border shadow-[0_0_45px_rgba(34,211,238,0.18)]"
+                          style={{
+                            color: "#ffffff",
+                            background: "rgba(2,11,32,0.82)",
+                            borderColor: "rgba(34,211,238,0.55)",
+                            textShadow: "0 0 18px rgba(34,211,238,0.22)",
+                            backdropFilter: "blur(4px)",
+                          }}
+                        >
+                          {countdownValue}
+                        </div>
                       </div>
                     )}
 
@@ -1845,11 +1992,25 @@ And I will dwell in the house of the LORD for ever.` }
                     </div>
                   </div>
 
-                  <div className="pt-4 text-[15px] flex items-end justify-between gap-5" style={{ color: "#7e8aa4" }}>
-                    <div className="max-w-[78%] leading-[1.6]">
-                      {hasFinished ? `Finished. Final flow ${finalFlow}% and final WPM ${finalWpm}.` : autoWpm ? `Auto-reading at ${autoWpm} WPM until the text is finished.` : "Press Space for next chunk. The gravity anchor holds your eye point while the text lane glides above it. Press F11 to toggle Fullscreen. Training Stories load exact lesson blocks and switch HighL: Custom automatically."}
+                  <div className="pt-4 flex flex-col gap-2" style={{ color: "#7e8aa4" }}>
+                    <div className="leading-[1.65] text-[14px] pr-2 w-full" style={{ whiteSpace: "normal", overflowWrap: "anywhere" }}>
+                      {hasFinished ? (
+                        `Finished. Final flow ${finalFlow}% and final WPM ${finalWpm}.`
+                      ) : countdownValue !== null ? (
+                        `Starting in ${countdownValue}...`
+                      ) : autoWpm ? (
+                        `Auto-reading at ${autoWpm} WPM until the text is finished.`
+                      ) : (
+                        <>
+                          <strong style={{ color: textColor }}>Press Space or click the reader display to move to the next chunk.</strong>{" "}
+                          The gravity anchor keeps your eye point fixed while the text lane glides above it.{" "}
+                          <strong style={{ color: textColor }}>Press F11 to toggle Fullscreen or Windowed mode.</strong>{" "}
+                          Training Stories load structured lesson blocks automatically.{" "}
+                          <strong style={{ color: textColor }}>Eye Anchor and Highlight are optional features that can be toggled.</strong>
+                        </>
+                      )}
                     </div>
-                    <div className="font-bold shrink-0 text-[15px]" style={{ color: "#1fdcff" }}>Reader {progressPercent}%</div>
+                    <div className="font-bold shrink-0 text-[15px] self-end" style={{ color: "#1fdcff" }}>Reader {progressPercent}%</div>
                   </div>
                 </div>
               </div>
@@ -1923,6 +2084,7 @@ And I will dwell in the house of the LORD for ever.` }
                   <div className="text-[52px] font-bold leading-none mt-3" style={{ color: scoreColor }}>{value}</div>
                 </div>
               ))}
+            </div>
             </div>
           </div>
         </div>
